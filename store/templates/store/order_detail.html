@@ -1,0 +1,224 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Order #{{ order.id }} - Bloom & Petal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Order #{{ order.id }}</h4>
+                <span class="badge {% if order.status == 'processing' %}bg-info{% elif order.status == 'shipped' %}bg-primary{% elif order.status == 'delivered' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-secondary{% endif %} fs-6">
+                    {{ order.status|title }}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="text-muted mb-3">Order Information</h5>
+                    <p><strong>Order Date:</strong> {{ order.created|date:"F j, Y, g:i a" }}</p>
+                    <p><strong>Payment Method:</strong> Credit Card</p>
+                    <p><strong>Order Status:</strong> {{ order.status|title }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-muted mb-3">Shipping Address</h5>
+                    <p><strong>{{ order.full_name }}</strong></p>
+                    <p>{{ order.address }}</p>
+                    <p>{{ order.city }}, {{ order.state }} {{ order.zip_code }}</p>
+                    <p>Email: {{ order.email }}</p>
+                </div>
+            </div>
+            
+            <h5 class="text-muted mb-3">Order Items</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-thumbnail me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="bg-light text-center me-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="mb-0">{{ item.product.name }}</h6>
+                                        <small class="text-muted">{{ item.product.category.name }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>${{ item.price }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td class="text-end">${{ item.get_total }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                            <td class="text-end">${{ order.total_price }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Shipping:</strong></td>
+                            <td class="text-end">$0.00</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                            <td class="text-end fw-bold">${{ order.total_price }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+            {% if order.status == 'processing' %}
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-info-circle me-2"></i> Your order is being processed. You will receive an email when it ships.
+            </div>
+            {% elif order.status == 'shipped' %}
+            <div class="alert alert-primary mt-4">
+                <i class="fas fa-truck me-2"></i> Your order has been shipped and is on its way to you!
+                <div class="mt-2">
+                    <strong>Tracking Number:</strong> <a href="#" class="alert-link">TRK123456789</a>
+                </div>
+            </div>
+            {% elif order.status == 'delivered' %}
+            <div class="alert alert-success mt-4">
+                <i class="fas fa-check-circle me-2"></i> Your order has been delivered. Thank you for shopping with us!
+            </div>
+            {% elif order.status == 'cancelled' %}
+            <div class="alert alert-danger mt-4">
+                <i class="fas fa-times-circle me-2"></i> This order has been cancelled.
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-footer bg-white">
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'my_orders' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Back to Orders
+                </a>
+                <div>
+                    {% if order.status != 'cancelled' and order.status != 'delivered' %}
+                    <button class="btn btn-outline-danger me-2">
+                        <i class="fas fa-times me-2"></i> Cancel Order
+                    </button>
+                    {% endif %}
+                    <button class="btn btn-primary" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i> Print Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Order Timeline</h5>
+        </div>
+        <div class="card-body">
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker bg-success"></div>
+                    <div class="timeline-content">
+                        <h6 class="mb-0">Order Placed</h6>
+                        <p class="text-muted small mb-0">{{ order.created|date:"F j, Y, g:i a" }}</p>
+                        <p class="mt-2 mb-0">Your order has been received and is being processed.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-marker {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}bg-success{% else %}bg-light{% endif %}"></div>
+                    <div class="timeline-content">
+                        <h6 class="mb-0">Payment Confirmed</h6>
+                        <p class="text-muted small mb-0">{{ order.created|date:"F j, Y, g:i a" }}</p>
+                        <p class="mt-2 mb-0">Your payment has been confirmed and your order is being prepared.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-marker {% if order.status == 'shipped' or order.status == 'delivered' %}bg-success{% else %}bg-light{% endif %}"></div>
+                    <div class="timeline-content">
+                        <h6 class="mb-0">Order Shipped</h6>
+                        {% if order.status == 'shipped' or order.status == 'delivered' %}
+                        <p class="text-muted small mb-0">{{ order.updated|date:"F j, Y, g:i a" }}</p>
+                        <p class="mt-2 mb-0">Your order has been shipped and is on its way to you.</p>
+                        {% else %}
+                        <p class="text-muted small mb-0">Pending</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-marker {% if order.status == 'delivered' %}bg-success{% else %}bg-light{% endif %}"></div>
+                    <div class="timeline-content">
+                        <h6 class="mb-0">Order Delivered</h6>
+                        {% if order.status == 'delivered' %}
+                        <p class="text-muted small mb-0">{{ order.updated|date:"F j, Y, g:i a" }}</p>
+                        <p class="mt-2 mb-0">Your order has been delivered. Thank you for shopping with us!</p>
+                        {% else %}
+                        <p class="text-muted small mb-0">Pending</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 15px;
+        height: 100%;
+        width: 2px;
+        background-color: #e9ecef;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-bottom: 30px;
+    }
+    
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 2px #e9ecef;
+    }
+    
+    .timeline-content {
+        padding-left: 15px;
+    }
+    
+    @media print {
+        .navbar, .footer, .card-footer, .btn {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %} 

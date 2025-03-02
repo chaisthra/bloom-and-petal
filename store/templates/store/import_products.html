@@ -1,0 +1,49 @@
+{% extends 'store/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Import Products - E-commerce Store{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Import Products from CSV</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {{ form|crispy }}
+                    
+                    <div class="alert alert-info mt-3">
+                        <h5>CSV Format Instructions</h5>
+                        <p>Your CSV file should have the following columns:</p>
+                        <ul>
+                            <li><strong>name</strong> (required): The product name</li>
+                            <li><strong>description</strong>: Product description</li>
+                            <li><strong>price</strong> (required): Product price (numeric value)</li>
+                            <li><strong>category</strong> (required): Category name (will be created if it doesn't exist)</li>
+                            <li><strong>stock</strong>: Available stock (integer)</li>
+                            <li><strong>available</strong>: Whether the product is available (true/false, yes/no, 1/0)</li>
+                        </ul>
+                        <p>Example:</p>
+                        <pre class="bg-light p-2">name,description,price,category,stock,available
+Artificial Red Rose,"Beautiful red rose, looks real",19.99,Artificial Roses,50,true
+Sunflower Bouquet,"Bright yellow sunflowers",29.99,Artificial Sunflowers,25,true</pre>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{% url 'manage_products' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-file-import"></i> Import Products
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
