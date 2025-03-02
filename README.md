@@ -61,13 +61,6 @@ Bloom & Petal is a beautiful e-commerce platform specializing in artificial flow
    python manage.py add_sample_products
    ```
 
-## Screenshots
-
-![Homepage](screenshots/homepage.png)
-![Product Listing](screenshots/product-listing.png)
-![Product Detail](screenshots/product-detail.png)
-![Shopping Cart](screenshots/shopping-cart.png)
-
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
